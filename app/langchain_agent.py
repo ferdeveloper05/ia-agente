@@ -3,13 +3,13 @@ from langchain_core.prompts import PromptTemplate
 
 llm = OllamaLLM(
     model="gpt-oss:20b", 
-    base_url="http://10.50.95.140:11440",
+    base_url="http://10.50.95.144:11440",
     temperature=0.7
 )
 
 prompt = PromptTemplate(
     input_variables=["tema"], 
-    template="Eres un experto en {{tema}} responde con claridad"
+    template="Eres un experto en responde temas sobre soporte tecnico con claridad"
 )
 
 chain = prompt | llm

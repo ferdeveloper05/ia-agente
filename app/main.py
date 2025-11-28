@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from langchain_agent import agente
 import requests
 
+
 app = FastAPI()
 
 @app.get('/', tags=['home'])
@@ -16,7 +17,7 @@ class Query(BaseModel):
 @app.get("/check-ollama")
 def check_ollama():
     try:
-        response = requests.get("http://10.50.95.140:11440/api/tags")
+        response = requests.get("http://10.50.95.144:11440/api/tags")
         return {"status": "Ollama activo", "modelos": response.json()}
     except Exception as e:
         return {"status": "Error de conexión", "detalle": str(e)}
