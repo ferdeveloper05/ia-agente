@@ -1,5 +1,6 @@
 from langchain_ollama.llms import OllamaLLM
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import PromptTemplate, ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.messages import HumanMessage, AIMessage
 
 llm = OllamaLLM(
     model="gpt-oss:20b", 
@@ -8,11 +9,27 @@ llm = OllamaLLM(
 )
 
 prompt = PromptTemplate(
-    input_variables=["tema"], 
-    template="Eres un experto en responde temas sobre soporte tecnico con claridad"
+    input_variables=["question"], 
+    template="Eres un experto en {question} responde con claridad",
 )
 
-chain = prompt | llm
+chat_prompt = ChatPromptTemplate([
+    ("system", "Eres un asistente util responde con claridad"),
+    MessagesPlaceholder(variable_name="historial"),
+    ("human", "{question}")
+])
+
+historial = []
+
+chain = chat_prompt | llm
 
 def agente(question: str) -> str:
-    return chain.invoke({"question": question})
+    global historial
+    #if historial is None: 
+        #historial = [] 
+    response = chain.invoke({"question": question, "historial":historial}) 
+    
+    historial.append(HumanMessage(content=question))
+    historial.append(AIMessage(content=str(response)))   
+    return response
+
