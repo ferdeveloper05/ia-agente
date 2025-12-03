@@ -25,3 +25,9 @@ def check_ollama():
 def ask(query: Query):
     answer = agente(query.question)
     return {"response": answer}
+
+
+@app.post("/pregunta", tags=['Pruebas'])
+def pregunta(query: Query):
+    respuesta = agente(query.question)
+    return {"respuesta":respuesta}
