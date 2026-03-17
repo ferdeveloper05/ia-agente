@@ -1,3 +1,6 @@
+networks:
+  agent_network:
+    driver: bridge
 
 services:
   app:
@@ -10,6 +13,9 @@ services:
       - ./app:/app
     depends_on:
       - ollama
+      - agent_mongodb_db
+    networks:
+      - agent_network
 
   ollama:
     image: ollama/ollama:0.13.1-rc0
@@ -19,6 +25,36 @@ services:
       - "11440:11434"
     volumes:
       - ollama_data:/root/.ollama
+    networks:
+      - agent_network
+
+  agent_mongodb_db:
+    image: mongo:latest
+    container_name: agent_mongodb_container
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data_v1:/data/db
+    networks:
+      - agent_network
+
+  frontend_streamlit:
+    build: ./streamlit_app
+    container_name: intelligent_agent_dashboard
+    restart: always
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit_app:/app
+      - streamlit_data_v1:/app/data
+    depends_on:
+      - app
+      - agent_mongodb_db
+    networks:
+      - agent_network
 
 volumes:
   ollama_data:
+  mongodb_data_v1:
+  streamlit_data_v1:
