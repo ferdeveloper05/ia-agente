@@ -156,3 +156,5 @@ __pycache__/
 # IDE-specific files
 .vscode/
 .idea/
+
+ejemplos/
