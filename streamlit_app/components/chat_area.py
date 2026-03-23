@@ -13,7 +13,7 @@ def call_ai_backend(session_id, prompt):
         response = requests.post(
             API_URL,
             json={"session_id": session_id, "question": prompt},
-            timeout=30
+            timeout=120
         )
         if response.status_code == 200:
             return response.json().get("response", "No se obtuvo respuesta del agente.")
