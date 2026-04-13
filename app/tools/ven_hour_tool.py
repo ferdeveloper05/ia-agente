@@ -2,13 +2,10 @@ from datetime import datetime, timedelta, timezone
 from langchain_core.tools import tool
 
 @tool
-def get_current_time_ven() -> str:
+def get_current_time_ven() -> dict:
     """ 
     Obtiene la fecha y hora actual de Venezuela (UTC-4).
-    Úsala cuando necesites saber la hora o la fecha actual, o para propósitos generales de tiempo.
-    
-    Returns:
-        String con fecha y hora formateada, incluyendo el día de la semana y el mes.
+    Retorna un diccionario con el objeto datetime y el texto formateado con la fecha/hora.
     """
     try:
         # Obtener hora UTC actual
@@ -29,7 +26,12 @@ def get_current_time_ven() -> str:
         fecha_texto = f"{nombre_dia}, {now.day} de {meses[now.month-1]} del {now.year}"
         hora_texto = now.strftime('%I:%M:%S %p')
         
-        return f"Fecha local (Venezuela): {fecha_texto}\nHora: {hora_texto}\nZona: UTC-4"
+        return {
+            "datetime": now,
+            "info_hoy": f"Fecha local (Venezuela): {fecha_texto}\nHora: {hora_texto}\nZona: UTC-4"
+        }
         
     except Exception as e:
-        return f'Error: No se pudo obtener la hora. INSTRUCCIÓN PARA EL AGENTE: Utiliza obligatoriamente la herramienta "duckduckgo_search" para buscar "hora actual venezuela" y obtener la hora actualizada de internet.'
+        return {
+            "error": f'Error: No se pudo obtener la hora. Detalles: {str(e)}'
+        }
