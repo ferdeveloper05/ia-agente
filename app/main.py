@@ -20,8 +20,3 @@ def check_ollama():
         return {"status": "Ollama activo", "modelos": response.json()}
     except Exception as e:
         return {"status": "Error de conexión", "detalle": str(e)}
-
-@app.post("/ask")
-def ask(query: Query):
-    answer = agente(query.question)
-    return {"response": answer}

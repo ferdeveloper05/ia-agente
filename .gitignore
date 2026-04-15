@@ -158,3 +158,5 @@ __pycache__/
 .idea/
 
 ejemplos/
+node_modules/
+ejemplo_de_sidebar_cerrado/

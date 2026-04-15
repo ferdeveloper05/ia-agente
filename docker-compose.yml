@@ -53,6 +53,20 @@ services:
       - agent_mongodb_db
     networks:
       - agent_network
+  frontend_react:
+    build: ./react_app
+    container_name: intelligent_agent_react_ui
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./react_app:/app
+      - /app/node_modules
+    depends_on:
+      - app
+      - agent_mongodb_db
+    networks:
+      - agent_network
 
 volumes:
   ollama_data:
