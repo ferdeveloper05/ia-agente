@@ -2,12 +2,32 @@ import { useState, useEffect } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
 import EmailModal from './components/EmailModal'
+import SettingsModal from './components/SettingsModal'
 
 function App() {
   const [conversations, setConversations] = useState({})
   const [currentConversationId, setCurrentConversationId] = useState(null)
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+  const [userName, setUserName] = useState(() => localStorage.getItem('userName') || '')
+
+  const handleUserConnected = (name) => {
+    setUserName(name)
+    localStorage.setItem('userName', name)
+  }
+
+  const handleLogout = () => {
+    setUserName('')
+    localStorage.removeItem('userName')
+  }
+
+  const handleDeleteAllChats = () => {
+    setConversations({})
+    setCurrentConversationId(null)
+    localStorage.removeItem('conversations') // Assuming I'll add persistence later or if it exists
+    createNewConversation()
+  }
 
   // Initialize first conversation
   useEffect(() => {
@@ -104,17 +124,28 @@ function App() {
         deleteConversation={deleteConversation}
         renameConversation={renameConversation}
         openEmailModal={() => setIsEmailModalOpen(true)}
+        openSettingsModal={() => setIsSettingsModalOpen(true)}
+        isUserConnected={!!userName}
+        handleLogout={handleLogout}
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
       <ChatArea 
+        conversationId={currentConversationId}
         currentConversation={conversations[currentConversationId]}
+        userName={userName}
         addMessage={addMessage}
         toggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         isSidebarCollapsed={isSidebarCollapsed}
       />
       {isEmailModalOpen && (
-        <EmailModal onClose={() => setIsEmailModalOpen(false)} />
+        <EmailModal onClose={() => setIsEmailModalOpen(false)} onConnected={handleUserConnected} />
+      )}
+      {isSettingsModalOpen && (
+        <SettingsModal 
+          onClose={() => setIsSettingsModalOpen(false)} 
+          onDeleteAllChats={handleDeleteAllChats} 
+        />
       )}
     </div>
   )

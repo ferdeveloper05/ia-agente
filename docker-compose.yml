@@ -18,7 +18,7 @@ services:
       - agent_network
 
   ollama:
-    image: ollama/ollama:0.13.1-rc0
+    image: ollama/ollama:0.20.7
     container_name: ollama
     restart: always
     ports:
@@ -29,15 +29,21 @@ services:
       - agent_network
 
   agent_mongodb_db:
-    image: mongo:latest
+    image: mongodb/mongodb-atlas-local
+    hostname: agent_mongodb_db
     container_name: agent_mongodb_container
     restart: always
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data_v1:/data/db
+      - db:/data/db
+      - configdb:/data/configdb
+      - mongot:/data/mongot
     networks:
       - agent_network
+    environment:
+      - ATLAS_LOCAL_DEPLOYMENT=true
+
 
   frontend_streamlit:
     build: ./streamlit_app
@@ -70,5 +76,7 @@ services:
 
 volumes:
   ollama_data:
-  mongodb_data_v1:
+  db:
+  configdb:
+  mongot:
   streamlit_data_v1:

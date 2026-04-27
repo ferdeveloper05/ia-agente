@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-function ChatArea({ currentConversation, addMessage }) {
+function ChatArea({ conversationId, currentConversation, userName, addMessage }) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const endOfMessagesRef = useRef(null);
@@ -12,13 +12,32 @@ function ChatArea({ currentConversation, addMessage }) {
 
   if (!currentConversation) return <div className="main-area"></div>;
 
-  const simulateAiResponse = (prompt) => {
+  const sendToBackend = async (prompt) => {
     setIsTyping(true);
-    setTimeout(() => {
-      const response = `Esta es una respuesta simulada a tu mensaje: '${prompt}'. Más adelante se conectará con el LLM.`;
-      addMessage(response, 'assistant');
+    try {
+      const res = await fetch('http://localhost:8000/api/v1/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: conversationId,
+          question: prompt
+        })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        addMessage(`Error del servidor (${res.status}): ${errText}`, 'assistant');
+        setIsTyping(false);
+        return;
+      }
+
+      const data = await res.json();
+      addMessage(data.response, 'assistant');
+    } catch (err) {
+      addMessage(`No se pudo conectar con el servidor: ${err.message}`, 'assistant');
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -29,14 +48,14 @@ function ChatArea({ currentConversation, addMessage }) {
     addMessage(userPrompt, 'user');
     setInput('');
     
-    simulateAiResponse(userPrompt);
+    sendToBackend(userPrompt);
   };
 
   return (
     <div className="main-area">
       <div className="chat-container">
         <div className="chat-title">
-          🤖 Bienvenido a tu chatbot de IA Sirpef
+          🤖 Bienvenido{userName ? ` ${userName}` : ''} a tu chatbot de IA Sirpef
         </div>
 
         <div className="chat-content">
