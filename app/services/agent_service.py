@@ -1,10 +1,13 @@
 from langchain_ollama import ChatOllama
 from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
-from langchain_community.tools import DuckDuckGoSearchRun
 from langgraph.prebuilt import create_react_agent
 from typing import List, Dict
 from core.config import settings
-from tools.custom_tools import get_current_datetime
+import re
+from tools.ven_hour_tool import get_current_time_ven
+from tools.web_browser import duckduckgo_browser
+from tools.predict_date_tool import calculate_future_date_ven
+
 
 # Diccionario para persistencia en memoria (TEMPORAL)
 sesiones: Dict[str, List[BaseMessage]] = {}
@@ -21,10 +24,13 @@ def get_session_history(session_id: str) -> List[BaseMessage]:
         sesiones[session_id] = []
     return sesiones[session_id]
 
+
+
 # Definición de herramientas
 tools = [
-    DuckDuckGoSearchRun(name="duckduckgo_search", description="Busca información en internet para datos actuales."),
-    get_current_datetime
+    get_current_time_ven,
+    calculate_future_date_ven,
+    duckduckgo_browser
 ]
 
 def agente_executor(session_id: str, question: str) -> str:
@@ -32,9 +38,12 @@ def agente_executor(session_id: str, question: str) -> str:
     historial = get_session_history(session_id)
     
     system_prompt = (
-        "Eres un asistente inteligente que usa herramientas cuando es necesario. Responde siempre en español. "
-        "Si necesitas saber la hora y falla la herramienta de fecha/hora, o si se te pide buscar un mapa de zonas horarias, "
-        "USA inmediatamente la herramienta duckduckgo_search (ej: 'timezonemap venezuela')."
+        "Eres un asistente inteligente que usa herramientas cuando es necesario. Responde siempre en español.\n"
+        "Si necesitas predecir fecha usa la herramienta predict_date_tool con la funcion calculate_future_date_ven.\n"
+        "Si necesitas buscar información externa o las herramientas específicas fallan, usa 'web_browser'.\n"
+        "IMPORTANTE: Proporciona ÚNICAMENTE la respuesta contextual al usuario final. "
+        "NO incluyas tu razonamiento previo, bloques XML de <think>...</think>, ni la palabra 'Thought:' solo incluye la respuesta final al usuario."
+        
     )
     
     # Agregar el nuevo mensaje del usuario
@@ -48,6 +57,9 @@ def agente_executor(session_id: str, question: str) -> str:
     
     # Extraer la respuesta (último mensaje del agente)
     answer = result["messages"][-1].content
+    
+    # Limpiar la respuesta de bloques de pensamiento o razonamiento
+    answer = re.sub(r'<think>.*?</think>', '', answer, flags=re.DOTALL).strip()
     
     # Actualizar la memoria con todos los mensajes devueltos por el agente (incluyendo llamadas a herramientas)
     sesiones[session_id] = result["messages"]
