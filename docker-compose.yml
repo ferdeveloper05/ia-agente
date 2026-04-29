@@ -13,7 +13,7 @@ services:
       - ./app:/app
     depends_on:
       - ollama
-      - agent_mongodb_db
+      - agent_mongodb
     networks:
       - agent_network
 
@@ -28,9 +28,9 @@ services:
     networks:
       - agent_network
 
-  agent_mongodb_db:
+  agent_mongodb:
     image: mongodb/mongodb-atlas-local
-    hostname: agent_mongodb_db
+    hostname: agent_mongodb
     container_name: agent_mongodb_container
     restart: always
     ports:
@@ -43,6 +43,8 @@ services:
       - agent_network
     environment:
       - ATLAS_LOCAL_DEPLOYMENT=true
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
 
 
   frontend_streamlit:
@@ -56,7 +58,7 @@ services:
       - streamlit_data_v1:/app/data
     depends_on:
       - app
-      - agent_mongodb_db
+      - agent_mongodb
     networks:
       - agent_network
   frontend_react:
@@ -70,7 +72,7 @@ services:
       - /app/node_modules
     depends_on:
       - app
-      - agent_mongodb_db
+      - agent_mongodb
     networks:
       - agent_network
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
 import EmailModal from './components/EmailModal'
@@ -11,6 +11,8 @@ function App() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
   const [userName, setUserName] = useState(() => localStorage.getItem('userName') || '')
+  
+  const initialized = useRef(false)
 
   const handleUserConnected = (name) => {
     setUserName(name)
@@ -22,21 +24,27 @@ function App() {
     localStorage.removeItem('userName')
   }
 
+  const generateId = () => Math.random().toString(36).substr(2, 9)
+
   const handleDeleteAllChats = () => {
-    setConversations({})
-    setCurrentConversationId(null)
-    localStorage.removeItem('conversations') // Assuming I'll add persistence later or if it exists
-    createNewConversation()
+    const newId = generateId()
+    setConversations({
+      [newId]: {
+        title: 'Nueva conversación',
+        messages: []
+      }
+    })
+    setCurrentConversationId(newId)
+    localStorage.removeItem('conversations')
   }
 
   // Initialize first conversation
   useEffect(() => {
-    if (Object.keys(conversations).length === 0) {
+    if (!initialized.current && Object.keys(conversations).length === 0) {
+      initialized.current = true
       createNewConversation()
     }
   }, [])
-
-  const generateId = () => Math.random().toString(36).substr(2, 9)
 
   const createNewConversation = () => {
     // Check if there is an empty conversation already
@@ -67,15 +75,24 @@ function App() {
   const deleteConversation = (id) => {
     const newConvs = { ...conversations }
     delete newConvs[id]
-    setConversations(newConvs)
 
     if (currentConversationId === id) {
       const remainingIds = Object.keys(newConvs)
       if (remainingIds.length > 0) {
         setCurrentConversationId(remainingIds[0])
+        setConversations(newConvs)
       } else {
-        createNewConversation()
+        const newId = generateId()
+        setConversations({
+          [newId]: {
+            title: 'Nueva conversación',
+            messages: []
+          }
+        })
+        setCurrentConversationId(newId)
       }
+    } else {
+      setConversations(newConvs)
     }
   }
 
