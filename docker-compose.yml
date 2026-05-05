@@ -79,5 +79,3 @@ volumes:
   configdb:
   mongot:
   streamlit_data_v1:
-
-  #https://www.geeksforgeeks.org/mongodb/mongodb-schema-design-best-practices-and-techniques/
