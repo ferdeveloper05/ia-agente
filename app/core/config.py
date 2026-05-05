@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     
     # Ollama Configuration
     OLLAMA_BASE_URL: str = "http://ollama:11434"
-    MODEL_NAME: str = "llama3.1:8b"
+    MODEL_NAME: str = "qwen3.5:9b" #"llama3.1:8b"
     TEMPERATURE: float = 0.7
     
     # API Configuration

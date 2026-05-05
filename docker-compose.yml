@@ -43,9 +43,6 @@ services:
       - agent_network
     environment:
       - ATLAS_LOCAL_DEPLOYMENT=true
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-
 
   frontend_streamlit:
     build: ./streamlit_app
@@ -82,3 +79,5 @@ volumes:
   configdb:
   mongot:
   streamlit_data_v1:
+
+  #https://www.geeksforgeeks.org/mongodb/mongodb-schema-design-best-practices-and-techniques/
